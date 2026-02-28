@@ -1,4 +1,4 @@
-# Task 1 Frontend
+# Frontend Placeholder
 
 
 ## Structure
@@ -6,7 +6,7 @@
 - `src/app/router.jsx` - application routes
 - `src/layouts/AppLayout.jsx` - main shell and navigation
 - `src/pages/*` - page-level placeholders
-- `src/components/task1/*` - Task 1 stub sections
+- `src/components/common/*` - shared placeholder components
 
 ## Run
 

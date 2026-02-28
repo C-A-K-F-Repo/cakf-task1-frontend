@@ -1,17 +1,14 @@
 import { NavLink, Outlet } from "react-router-dom";
 
 const navItems = [
-  { to: "/", label: "Overview" },
-  { to: "/auth", label: "Auth" },
-  { to: "/task1/users", label: "Task 1 Users" },
-  { to: "/task1/domain", label: "Task 1 Domain" }
+  { to: "/", label: "Overview" }
 ];
 
 export function AppLayout() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <h1>Task 1 Frontend Boilerplate</h1>
+        <h1>Frontend Boilerplate</h1>
         <p>Structure only. No business logic or API integration.</p>
       </header>
 
