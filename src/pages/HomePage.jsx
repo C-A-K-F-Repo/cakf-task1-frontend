@@ -4,7 +4,7 @@ export function HomePage() {
   return (
     <PageStub
       title="Frontend Placeholder"
-      description="Boilerplate shell for assignment implementation."
+      description="Boilerplate"
     />
   );
 }

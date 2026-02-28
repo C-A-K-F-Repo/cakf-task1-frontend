@@ -9,7 +9,6 @@ export function AppLayout() {
     <div className="app-shell">
       <header className="app-header">
         <h1>Frontend Boilerplate</h1>
-        <p>Structure only. No business logic or API integration.</p>
       </header>
 
       <nav className="app-nav" aria-label="Main navigation">
