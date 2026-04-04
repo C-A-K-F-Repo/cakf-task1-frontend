@@ -1,0 +1,66 @@
+:root {
+  color: #13213b;
+  background: #f6f8fc;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.app-shell {
+  margin: 0 auto;
+  max-width: 980px;
+  padding: 24px;
+}
+
+.app-header h1 {
+  margin: 0;
+}
+
+.app-header p {
+  margin-top: 8px;
+  color: #3f4e6a;
+}
+
+.app-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0 24px;
+}
+
+.nav-link {
+  border: 1px solid #cdd7ec;
+  border-radius: 999px;
+  color: #1f3154;
+  padding: 8px 14px;
+  text-decoration: none;
+}
+
+.nav-link--active {
+  background: #1f3154;
+  color: #ffffff;
+}
+
+.page-stub {
+  background: #ffffff;
+  border: 1px solid #dce4f3;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.page-stub h2 {
+  margin-top: 0;
+}
+
+.card {
+  border: 1px dashed #b7c7e8;
+  border-radius: 12px;
+  margin-top: 16px;
+  padding: 14px;
+}
