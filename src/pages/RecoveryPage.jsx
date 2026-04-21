@@ -90,6 +90,9 @@ export function RecoveryPage() {
                     {showPassword ? "👁️" : "👁️‍🗨️"}
                   </span>
                 </div>
+                {password.length > 0 && !isPassValid && (
+                  <span style={errorText}>Мін. 8 симв, велика літера, цифра, спецсимвол</span>
+                )}
               </div>
 
               <div style={inputGroup}>
@@ -108,6 +111,9 @@ export function RecoveryPage() {
                     {showConfirmPass ? "👁️" : "👁️‍🗨️"}
                   </span>
                 </div>
+                {confirmPassword.length > 0 && !doPasswordsMatch && (
+                  <span style={errorText}>Паролі не співпадають</span>
+                )}
               </div>
 
               <button 
