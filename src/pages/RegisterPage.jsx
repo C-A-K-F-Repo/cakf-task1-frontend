@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { GoogleAuthBtn } from '../components/GoogleAuthBtn';
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -112,6 +113,8 @@ export function RegisterPage() {
             Продовжити
           </button>
         </div>
+
+        <GoogleAuthBtn />
 
         <p style={agreementStyle}>
           Натискаючи кнопку «Продовжити», ви даєте згоду на <span style={linkSpan}>обробку персональних даних</span>
