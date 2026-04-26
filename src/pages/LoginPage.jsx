@@ -1,5 +1,7 @@
+import { GoogleLogin } from '@react-oauth/google';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { GoogleAuthBtn } from '../components/GoogleAuthBtn';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -59,6 +61,8 @@ export function LoginPage() {
             Увійти
           </button>
         </div>
+
+        <GoogleAuthBtn />
 
         <div style={footerStyle}>
           <p style={linkStyle} onClick={() => navigate('/register')}>
