@@ -64,3 +64,24 @@ body {
   margin-top: 16px;
   padding: 14px;
 }
+
+.PhoneInput {
+  background: #f4f4f7;
+  border-radius: 16px;
+  padding: 0 20px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  border: 1px solid transparent;
+}
+
+.PhoneInputInput {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: #1a1a1a;
+  width: 100%;
+  padding: 20px 0;
+  font-family: 'Inter', sans-serif;
+}

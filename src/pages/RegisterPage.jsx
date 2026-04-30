@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import 'react-phone-number-input/style.css'
+import PhoneInput, {isValidPhoneNumber} from 'react-phone-number-input'
 
 export function RegisterPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
-  const [phone, setPhone] = useState('+380');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -13,20 +15,12 @@ export function RegisterPage() {
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const isEmailValid = emailRegex.test(email);
-  const isPhoneValid = phone.length === 13;
   const passRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
   const isPassValid = passRegex.test(password);
   const doPasswordsMatch = password === confirmPassword && confirmPassword.length > 0;
   const isAddressValid = address.trim().length > 5;
 
-  const canSubmit = isEmailValid && isPhoneValid && isPassValid && doPasswordsMatch && isAddressValid;
-
-  const handlePhoneChange = (e) => {
-    const input = e.target.value;
-    if (!input.startsWith('+380')) { setPhone('+380'); return; }
-    const digitsOnly = input.slice(4).replace(/\D/g, '');
-    setPhone('+380' + digitsOnly.slice(0, 9));
-  };
+  const canSubmit = isEmailValid && phone && isValidPhoneNumber(phone) && isPassValid && doPasswordsMatch && isAddressValid;
 
   return (
     <div style={containerStyle}>
@@ -57,15 +51,16 @@ export function RegisterPage() {
           />
 
           <div style={inputGroup}>
-            <input
-              type="text"
+            <PhoneInput
+              international
+              style={{...inputStyle}}
               placeholder="Номер телефону"
-              style={{ ...inputStyle, border: phone.length > 4 && !isPhoneValid ? '1px solid #ff4d4d' : 'none' }}
+              defaultCountry="UA"
               value={phone}
-              onChange={handlePhoneChange}
+              onChange={setPhone}
             />
-            {phone.length > 4 && !isPhoneValid && (
-              <span style={errorText}>Невірний формат: 9 цифр після +380</span>
+            {phone && !isValidPhoneNumber(phone) && (
+              <span style={errorText}>Невірний формат</span>
             )}
           </div>
 
