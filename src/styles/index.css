@@ -126,6 +126,43 @@ a {
   width: 20px;
 }
 
+.account-menu {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.account-menu__email {
+  color: var(--muted);
+  font-size: 0.85rem;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-menu__logout {
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  cursor: pointer;
+  min-height: 42px;
+  padding: 0 14px;
+}
+
+.account-menu__logout:hover {
+  border-color: var(--blue);
+  color: var(--blue-dark);
+}
+
+.auth-loading {
+  align-items: center;
+  color: var(--muted);
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+}
+
 .home-page {
   display: grid;
   gap: 24px;

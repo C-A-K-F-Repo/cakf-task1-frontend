@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 
+import { ProtectedRoute } from "../auth/ProtectedRoute";
 import { AppLayout } from "../layouts/AppLayout";
 import { HomePage } from "../pages/HomePage";
 import { RegisterPage } from "../pages/RegisterPage";
@@ -10,12 +11,17 @@ import { NotFoundPage } from "../pages/NotFoundPage";
 
 export const router = createBrowserRouter([
   {
-    path: "/",
-    element: <AppLayout />,
+    element: <ProtectedRoute />,
     children: [
       {
-        index: true,
-        element: <HomePage />
+        path: "/",
+        element: <AppLayout />,
+        children: [
+          {
+            index: true,
+            element: <HomePage />
+          }
+        ]
       }
     ]
   },
