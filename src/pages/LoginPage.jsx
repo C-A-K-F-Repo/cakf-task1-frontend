@@ -1,198 +1,113 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+
+import { useAuth } from "../auth/useAuth";
+
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+function getRedirectPath(location) {
+  const from = location.state?.from;
+
+  if (!from) {
+    return "/";
+  }
+
+  return `${from.pathname}${from.search ?? ""}`;
+}
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPass, setShowPass] = useState(false);
+  const location = useLocation();
+  const { isAuthenticated, login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const isEmailValid = emailRegex.test(email);
+  const canSubmit = isEmailValid && password.length > 0 && !isSubmitting;
+  const redirectPath = getRedirectPath(location);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(redirectPath, { replace: true });
+    }
+  }, [isAuthenticated, navigate, redirectPath]);
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    if (!canSubmit) {
+      return;
+    }
+
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      await login({ email, password });
+      navigate(redirectPath, { replace: true });
+    } catch (apiError) {
+      setError(apiError.message || "Не вдалося увійти");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
-    <div style={containerStyle}>
-      <div style={cardStyle}>
-        <h2 style={titleStyle}>Вхід</h2>
-        <p style={subtitleStyle}>Ласкаво просимо назад</p>
+    <main className="auth-page">
+      <section className="auth-card" aria-labelledby="login-title">
+        <p className="auth-eyebrow">CAKF SHOP</p>
+        <h1 id="login-title">Вхід</h1>
+        <p className="auth-subtitle">Увійдіть, щоб продовжити покупки.</p>
 
-        <div style={formStyle}>
-          <div style={inputGroup}>
+        <form className="auth-form" onSubmit={handleSubmit} noValidate>
+          <label className="auth-field">
+            <span>Email</span>
             <input
               type="email"
-              placeholder="Email"
-              style={{ 
-                ...inputStyle, 
-                border: email.length > 0 && !isEmailValid ? '1px solid #ff4d4d' : 'none' 
-              }}
+              placeholder="name@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              aria-invalid={email.length > 0 && !isEmailValid}
+              onChange={(event) => setEmail(event.target.value)}
             />
-            {email.length > 0 && !isEmailValid && (
-              <span style={errorText}>Невірний формат пошти</span>
-            )}
-          </div>
+            {email.length > 0 && !isEmailValid ? (
+              <small>Невірний формат пошти</small>
+            ) : null}
+          </label>
 
-          <div style={inputGroup}>
-            <div style={{ position: 'relative' }}>
+          <label className="auth-field">
+            <span>Пароль</span>
+            <div className="auth-password-field">
               <input
-                type={showPass ? "text" : "password"}
-                placeholder="Пароль"
-                style={inputStyle}
+                type={showPassword ? "text" : "password"}
+                placeholder="Ваш пароль"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(event) => setPassword(event.target.value)}
               />
-              <span style={eyeIconStyle} onClick={() => setShowPass(!showPass)}>
-                {showPass ? "👁️" : "👁️‍🗨️"}
-              </span>
+              <button
+                type="button"
+                className="auth-password-toggle"
+                onClick={() => setShowPassword((current) => !current)}
+              >
+                {showPassword ? "Сховати" : "Показати"}
+              </button>
             </div>
-          </div>
+          </label>
 
-          <button
-            disabled={!isEmailValid || password.length < 1}
-            style={{ 
-              ...buttonStyle, 
-              opacity: (isEmailValid && password.length > 0) ? 1 : 0.5 
-            }}
-            onClick={() => alert('Вхід виконано!')}
-          >
-            Увійти
+          {error ? <p className="auth-error" role="alert">{error}</p> : null}
+
+          <button className="auth-submit" type="submit" disabled={!canSubmit}>
+            {isSubmitting ? "Входимо..." : "Увійти"}
           </button>
-        </div>
+        </form>
 
-        <div style={footerStyle}>
-          <p style={linkStyle} onClick={() => navigate('/register')}>
-            Немає аккаунту? Реєстрація
-          </p>
-          <p style={linkStyle} onClick={() => navigate('/recovery')}>
-            Забули пароль?
-          </p>
+        <div className="auth-links">
+          <Link to="/register">Немає аккаунту? Реєстрація</Link>
+          <Link to="/recovery">Забули пароль?</Link>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
-
-const containerStyle = { 
-  display: 'flex', 
-  justifyContent: 'center', 
-  alignItems: 'center', 
-  minHeight: '100vh', 
-  background: '#ffffff', 
-  fontFamily: 'Inter, sans-serif' 
-};
-
-const cardStyle = { 
-  background: '#fff', 
-  padding: '60px 45px', 
-  borderRadius: '32px', 
-  width: '100%', 
-  maxWidth: '500px', 
-  textAlign: 'center', 
-  boxShadow: '0 4px 30px rgba(0, 0, 0, 0.03)' 
-};
-
-const titleStyle = { 
-  fontSize: '28px', 
-  fontWeight: '700', 
-  marginBottom: '30px', 
-  color: '#333' 
-};
-
-const formStyle = { 
-  display: 'flex',
-   flexDirection: 'column',
-    gap: '15px' 
-};
-
-const inputGroup = { 
-  display: 'flex', 
-  flexDirection: 'column', 
-  textAlign: 'left', 
-  gap: '4px', 
-  position: 'relative' 
-};
-
-const inputStyle = { 
-  background: '#f4f4f7',
-  border: '1px solid transparent', 
-  borderRadius: '16px', 
-  padding: '20px', 
-  fontSize: '16px', 
-  outline: 'none', 
-  width: '100%', 
-  boxSizing: 'border-box', 
-  color: '#1a1a1a',
-  transition: '0.2s border-color'
-};
-
-const errorText = { 
-  color: '#ff4d4d', 
-  fontSize: '10px', 
-  marginLeft: '10px', 
-  fontWeight: '500' 
-};
-
-const eyeIconStyle = { 
-  position: 'absolute', 
-  right: '20px', 
-  top: '50%', 
-  transform: 'translateY(-50%)', 
-  cursor: 'pointer', 
-  opacity: 0.4 
-};
-
-const buttonStyle = { 
-  background: '#7ba3ff', 
-  color: '#fff', 
-  border: 'none', 
-  borderRadius: '15px', 
-  padding: '18px', 
-  fontSize: '16px', 
-  fontWeight: '600', 
-  cursor: 'pointer', 
-  marginTop: '10px', 
-  boxShadow: '0 8px 20px rgba(123, 163, 255, 0.3)', 
-  transition: '0.3s' 
-};
-
-const stepHintStyle = { 
-  fontSize: '14px', 
-  color: '#666', 
-  marginBottom: '10px' 
-};
-
-const agreementStyle = { 
-  fontSize: '11px', 
-  color: '#aaa', 
-  marginTop: '15px', 
-  lineHeight: '1.5' 
-};
-
-const footerStyle = { 
-  marginTop: '25px', 
-  fontSize: '14px',
-  display: 'flex',         
-  justifyContent: 'space-between',
-  alignItems: 'center' 
-};
-
-const linkStyle = { 
-  color: '#7ba3ff', 
-  fontWeight: '600', 
-  cursor: 'pointer' 
-};
-
-const subtitleStyle = { 
-  color: '#666', 
-  fontSize: '14px', 
-  marginBottom: '25px' 
-};
-
-const linkSpan = { 
-  color: '#7ba3ff', 
-  fontWeight: '600', 
-  cursor: 'pointer' 
-};
-
-const footerLink = { color: '#666' };

@@ -1,265 +1,170 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
+import { authApi } from "../api/authApi";
+
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const passwordRegex = /^(?=.*[A-Za-z])(?=.*[^A-Za-z0-9]).{8,}$/;
 
 export function RecoveryPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const isEmailValid = emailRegex.test(email);
-  const passRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-  const isPassValid = passRegex.test(password);
+  const isPasswordValid = passwordRegex.test(password);
   const doPasswordsMatch = password === confirmPassword && confirmPassword.length > 0;
+  const canRequestCode = isEmailValid && !isSubmitting;
+  const canResetPassword = code.length === 6 && isPasswordValid && doPasswordsMatch && !isSubmitting;
+
+  async function handleRequestCode(event) {
+    event.preventDefault();
+
+    if (!canRequestCode) {
+      return;
+    }
+
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      await authApi.requestPasswordRecovery(email);
+      setStep(2);
+    } catch (apiError) {
+      setError(apiError.message || "Не вдалося надіслати код");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleResetPassword(event) {
+    event.preventDefault();
+
+    if (!canResetPassword) {
+      return;
+    }
+
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      await authApi.resetPassword({ email, code, newPassword: password });
+      navigate("/login", { replace: true, state: { message: "Пароль змінено. Увійдіть з новим паролем." } });
+    } catch (apiError) {
+      setError(apiError.message || "Не вдалося змінити пароль");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
-    <div style={containerStyle}>
-      <div style={cardStyle}>
-        <h2 style={titleStyle}>Відновлення</h2>
+    <main className="auth-page">
+      <section className="auth-card" aria-labelledby="recovery-title">
+        <p className="auth-eyebrow">Повернення доступу</p>
+        <h1 id="recovery-title">Відновлення паролю</h1>
+        <p className="auth-subtitle">
+          {step === 1 ? "Введіть пошту, і ми надішлемо код." : "Введіть код з листа і новий пароль."}
+        </p>
 
-        <div style={formStyle}>
-          {step === 1 && (
-            <>
-              <p style={subtitleStyle}>Введіть пошту для отримання коду</p>
-              <div style={inputGroup}>
-                <input
-                  type="email"
-                  placeholder="Email"
-                  style={{ 
-                    ...inputStyle, 
-                    border: email.length > 0 && !isEmailValid ? '1px solid #ff4d4d' : 'none' 
-                  }}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                {email.length > 0 && !isEmailValid && <span style={errorText}>Невірний формат пошти</span>}
-              </div>
-              <button 
-                disabled={!isEmailValid}
-                style={{ ...buttonStyle, opacity: isEmailValid ? 1 : 0.5 }} 
-                onClick={() => setStep(2)}
-              >
-                Надіслати код
-              </button>
-            </>
-          )}
-
-          {step === 2 && (
-            <>
-              <p style={subtitleStyle}>Введіть 6 цифр із листа</p>
+        {step === 1 ? (
+          <form className="auth-form" onSubmit={handleRequestCode} noValidate>
+            <label className="auth-field">
+              <span>Email</span>
               <input
-                type="text"
-                placeholder="000000" 
-                style={{ ...inputStyle, textAlign: 'center', letterSpacing: '5px', fontSize: '20px' }}
-                value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 6))}
+                type="email"
+                placeholder="name@example.com"
+                value={email}
+                aria-invalid={email.length > 0 && !isEmailValid}
+                onChange={(event) => setEmail(event.target.value)}
               />
-              <button 
-                disabled={code.length !== 6}
-                style={{ ...buttonStyle, opacity: code.length === 6 ? 1 : 0.5 }} 
-                onClick={() => setStep(3)}
-              >
-                Підтвердити
-              </button>
-            </>
-          )}
+              {email.length > 0 && !isEmailValid ? <small>Невірний формат пошти</small> : null}
+            </label>
 
-          {step === 3 && (
-            <>
-              <p style={subtitleStyle}>Встановіть новий пароль</p>
-              
-              <div style={inputGroup}>
-                <div style={{ position: 'relative' }}>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Новий пароль"
-                    style={{ 
-                      ...inputStyle, 
-                      border: password.length > 0 && !isPassValid ? '1px solid #ff4d4d' : 'none' 
-                    }}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <span style={eyeIconStyle} onClick={() => setShowPassword(!showPassword)}>
-                    {showPassword ? "👁️" : "👁️‍🗨️"}
-                  </span>
-                </div>
-                {password.length > 0 && !isPassValid && (
-                  <span style={errorText}>Мін. 8 симв, велика літера, цифра, спецсимвол</span>
-                )}
+            {error ? <p className="auth-error" role="alert">{error}</p> : null}
+
+            <button className="auth-submit" type="submit" disabled={!canRequestCode}>
+              {isSubmitting ? "Надсилаємо..." : "Надіслати код"}
+            </button>
+          </form>
+        ) : (
+          <form className="auth-form" onSubmit={handleResetPassword} noValidate>
+            <label className="auth-field">
+              <span>Код із листа</span>
+              <input
+                className="auth-code-input"
+                type="text"
+                placeholder="000000"
+                value={code}
+                onChange={(event) => setCode(event.target.value.toUpperCase().slice(0, 6))}
+              />
+            </label>
+
+            <label className="auth-field">
+              <span>Новий пароль</span>
+              <div className="auth-password-field">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Мін. 8 символів"
+                  value={password}
+                  aria-invalid={password.length > 0 && !isPasswordValid}
+                  onChange={(event) => setPassword(event.target.value)}
+                />
+                <button
+                  type="button"
+                  className="auth-password-toggle"
+                  onClick={() => setShowPassword((current) => !current)}
+                >
+                  {showPassword ? "Сховати" : "Показати"}
+                </button>
               </div>
+              {password.length > 0 && !isPasswordValid ? (
+                <small>Мінімум 8 символів, літера і спецсимвол</small>
+              ) : null}
+            </label>
 
-              <div style={inputGroup}>
-                <div style={{ position: 'relative' }}>
-                  <input
-                    type={showConfirmPass ? "text" : "password"}
-                    placeholder="Повторіть пароль"
-                    style={{ 
-                      ...inputStyle, 
-                      border: confirmPassword.length > 0 && !doPasswordsMatch ? '1px solid #ff4d4d' : 'none' 
-                    }}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                  <span style={eyeIconStyle} onClick={() => setShowConfirmPass(!showConfirmPass)}>
-                    {showConfirmPass ? "👁️" : "👁️‍🗨️"}
-                  </span>
-                </div>
-                {confirmPassword.length > 0 && !doPasswordsMatch && (
-                  <span style={errorText}>Паролі не співпадають</span>
-                )}
+            <label className="auth-field">
+              <span>Повторіть пароль</span>
+              <div className="auth-password-field">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Повторіть пароль"
+                  value={confirmPassword}
+                  aria-invalid={confirmPassword.length > 0 && !doPasswordsMatch}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                />
+                <button
+                  type="button"
+                  className="auth-password-toggle"
+                  onClick={() => setShowConfirmPassword((current) => !current)}
+                >
+                  {showConfirmPassword ? "Сховати" : "Показати"}
+                </button>
               </div>
+              {confirmPassword.length > 0 && !doPasswordsMatch ? (
+                <small>Паролі не співпадають</small>
+              ) : null}
+            </label>
 
-              <button 
-                disabled={!(isPassValid && doPasswordsMatch)}
-                style={{ ...buttonStyle, opacity: (isPassValid && doPasswordsMatch) ? 1 : 0.5 }} 
-                onClick={() => { alert('Пароль змінено!'); navigate('/login'); }}
-              >
-                Зберегти пароль
-              </button>
-            </>
-          )}
-        </div>
+            {error ? <p className="auth-error" role="alert">{error}</p> : null}
 
-        <div style={footerStyle}>
-          <p style={linkStyle} onClick={() => navigate('/login')}>
-            Повернутись до входу
-          </p>
-          <p style={linkStyle} onClick={() => navigate('/register')}>
-            Повернутись до реєстрації
-          </p>
+            <button className="auth-submit" type="submit" disabled={!canResetPassword}>
+              {isSubmitting ? "Зберігаємо..." : "Зберегти пароль"}
+            </button>
+          </form>
+        )}
+
+        <div className="auth-links">
+          <Link to="/login">Повернутись до входу</Link>
+          <Link to="/register">Реєстрація</Link>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
-
-const containerStyle = { 
-  display: 'flex', 
-  justifyContent: 'center', 
-  alignItems: 'center', 
-  minHeight: '100vh', 
-  background: '#ffffff', 
-  fontFamily: 'Inter, sans-serif' 
-};
-
-const cardStyle = { 
-  background: '#fff', 
-  padding: '60px 45px', 
-  borderRadius: '32px', 
-  width: '100%', 
-  maxWidth: '500px', 
-  textAlign: 'center', 
-  boxShadow: '0 4px 30px rgba(0, 0, 0, 0.03)' 
-};
-
-const titleStyle = { 
-  fontSize: '28px', 
-  fontWeight: '700', 
-  marginBottom: '30px', 
-  color: '#333' 
-};
-
-const formStyle = { 
-  display: 'flex',
-   flexDirection: 'column',
-    gap: '15px' 
-};
-
-const inputGroup = { 
-  display: 'flex', 
-  flexDirection: 'column', 
-  textAlign: 'left', 
-  gap: '4px', 
-  position: 'relative' 
-};
-
-const inputStyle = { 
-  background: '#f4f4f7',
-  border: '1px solid transparent', 
-  borderRadius: '16px', 
-  padding: '20px', 
-  fontSize: '16px', 
-  outline: 'none', 
-  width: '100%', 
-  boxSizing: 'border-box', 
-  color: '#1a1a1a',
-  transition: '0.2s border-color'
-};
-
-const errorText = { 
-  color: '#ff4d4d', 
-  fontSize: '10px', 
-  marginLeft: '10px', 
-  fontWeight: '500' 
-};
-
-const eyeIconStyle = { 
-  position: 'absolute', 
-  right: '20px', 
-  top: '50%', 
-  transform: 'translateY(-50%)', 
-  cursor: 'pointer', 
-  opacity: 0.4 
-};
-
-const buttonStyle = { 
-  background: '#7ba3ff', 
-  color: '#fff', 
-  border: 'none', 
-  borderRadius: '15px', 
-  padding: '18px', 
-  fontSize: '16px', 
-  fontWeight: '600', 
-  cursor: 'pointer', 
-  marginTop: '10px', 
-  boxShadow: '0 8px 20px rgba(123, 163, 255, 0.3)', 
-  transition: '0.3s' 
-};
-
-const stepHintStyle = { 
-  fontSize: '14px', 
-  color: '#666', 
-  marginBottom: '10px' 
-};
-
-const agreementStyle = { 
-  fontSize: '11px', 
-  color: '#aaa', 
-  marginTop: '15px', 
-  lineHeight: '1.5' 
-};
-
-const footerStyle = { 
-  marginTop: '25px', 
-  fontSize: '14px',
-  display: 'flex',         
-  justifyContent: 'space-between',
-  alignItems: 'center' 
-};
-
-const linkStyle = { 
-  color: '#7ba3ff', 
-  fontWeight: '600', 
-  cursor: 'pointer' 
-};
-
-const subtitleStyle = { 
-  color: '#666', 
-  fontSize: '14px', 
-  marginBottom: '25px' 
-};
-
-const linkSpan = { 
-  color: '#7ba3ff', 
-  fontWeight: '600', 
-  cursor: 'pointer' 
-};
-
-const footerLink = { color: '#666' };

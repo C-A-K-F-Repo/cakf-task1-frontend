@@ -6,6 +6,7 @@ import { HomePage } from "../pages/HomePage";
 import { RegisterPage } from "../pages/RegisterPage";
 import { LoginPage } from "../pages/LoginPage";
 import { RecoveryPage } from "../pages/RecoveryPage";
+import { VerifyEmailPage } from "../pages/VerifyEmailPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 
 
@@ -36,6 +37,10 @@ export const router = createBrowserRouter([
   {
     path: "/recovery",
     element: <RecoveryPage />
+  },
+  {
+    path: "/verify-email",
+    element: <VerifyEmailPage />
   },
   {
     path: "*",

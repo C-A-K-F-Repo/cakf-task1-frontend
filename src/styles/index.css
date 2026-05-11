@@ -513,4 +513,12 @@ a {
   .product-grid {
     grid-template-columns: 1fr;
   }
+
+  .auth-card {
+    padding: 28px 18px;
+  }
+
+  .auth-links {
+    display: grid;
+  }
 }
