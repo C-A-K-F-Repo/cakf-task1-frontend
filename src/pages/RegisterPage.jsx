@@ -1,261 +1,218 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+
+import { authApi } from "../api/authApi";
+
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const passwordRegex = /^(?=.*[A-Za-z])(?=.*[^A-Za-z0-9]).{8,}$/;
 
 export function RegisterPage() {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [address, setAddress] = useState('');
-  const [phone, setPhone] = useState('+380');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPass, setShowPass] = useState(false);
-  const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [dob, setDob] = useState("");
+  const [email, setEmail] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("+380");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [registeredEmail, setRegisteredEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const isFullNameValid = fullName.trim().length >= 3;
+  const isDobValid = Boolean(dob);
   const isEmailValid = emailRegex.test(email);
-  const isPhoneValid = phone.length === 13;
-  const passRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-  const isPassValid = passRegex.test(password);
+  const isPhoneValid = phoneNumber.length === 13;
+  const isPasswordValid = passwordRegex.test(password);
   const doPasswordsMatch = password === confirmPassword && confirmPassword.length > 0;
-  const isAddressValid = address.trim().length > 5;
+  const isAddressValid = deliveryAddress.trim().length > 5;
+  const canSubmit =
+    isFullNameValid &&
+    isDobValid &&
+    isEmailValid &&
+    isPhoneValid &&
+    isPasswordValid &&
+    doPasswordsMatch &&
+    isAddressValid &&
+    !isSubmitting;
 
-  const canSubmit = isEmailValid && isPhoneValid && isPassValid && doPasswordsMatch && isAddressValid;
+  function handlePhoneChange(event) {
+    const input = event.target.value;
+    if (!input.startsWith("+380")) {
+      setPhoneNumber("+380");
+      return;
+    }
 
-  const handlePhoneChange = (e) => {
-    const input = e.target.value;
-    if (!input.startsWith('+380')) { setPhone('+380'); return; }
-    const digitsOnly = input.slice(4).replace(/\D/g, '');
-    setPhone('+380' + digitsOnly.slice(0, 9));
-  };
+    const digitsOnly = input.slice(4).replace(/\D/g, "");
+    setPhoneNumber(`+380${digitsOnly.slice(0, 9)}`);
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    if (!canSubmit) {
+      return;
+    }
+
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      await authApi.register({
+        full_name: fullName.trim(),
+        dob: new Date(`${dob}T00:00:00`).toISOString(),
+        delivery_address: deliveryAddress.trim(),
+        phone_number: phoneNumber,
+        email,
+        password
+      });
+      setRegisteredEmail(email);
+    } catch (apiError) {
+      setError(apiError.message || "Не вдалося зареєструватися");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  if (registeredEmail) {
+    return (
+      <main className="auth-page">
+        <section className="auth-card auth-card--success" aria-labelledby="register-success-title">
+          <p className="auth-eyebrow">Пошта майже готова</p>
+          <h1 id="register-success-title">Перевірте email</h1>
+          <p className="auth-subtitle">
+            Ми надіслали посилання підтвердження на <strong>{registeredEmail}</strong>. Після
+            підтвердження поверніться до входу.
+          </p>
+          <Link className="auth-submit auth-submit--link" to="/login">
+            Перейти до входу
+          </Link>
+        </section>
+      </main>
+    );
+  }
 
   return (
-    <div style={containerStyle}>
-      <div style={cardStyle}>
-        <h2 style={titleStyle}>Реєстрація</h2>
-        <p style={subtitleStyle}>Створіть свій аккаунт</p>
+    <main className="auth-page">
+      <section className="auth-card" aria-labelledby="register-title">
+        <p className="auth-eyebrow">Новий покупець</p>
+        <h1 id="register-title">Реєстрація</h1>
+        <p className="auth-subtitle">Створіть аккаунт і підтвердіть пошту з листа.</p>
 
-        <div style={formStyle}>
-          <input type="text" placeholder="Прізвище, Ім'я, По батькові" style={inputStyle} />
-
-          <div style={inputGroup}>
-            <input
-              type="email"
-              placeholder="Email"
-              style={{ ...inputStyle, border: email.length > 0 && !isEmailValid ? '1px solid #ff4d4d' : 'none' }}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            {email.length > 0 && !isEmailValid && <span style={errorText}>Невірний формат пошти</span>}
-          </div>
-
-          <input
-            type="text"
-            placeholder="Місце проживання"
-            style={inputStyle}
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
-
-          <div style={inputGroup}>
+        <form className="auth-form" onSubmit={handleSubmit} noValidate>
+          <label className="auth-field">
+            <span>ПІБ</span>
             <input
               type="text"
-              placeholder="Номер телефону"
-              style={{ ...inputStyle, border: phone.length > 4 && !isPhoneValid ? '1px solid #ff4d4d' : 'none' }}
-              value={phone}
+              placeholder="Прізвище Ім'я По батькові"
+              value={fullName}
+              onChange={(event) => setFullName(event.target.value)}
+            />
+          </label>
+
+          <label className="auth-field">
+            <span>Дата народження</span>
+            <input type="date" value={dob} onChange={(event) => setDob(event.target.value)} />
+          </label>
+
+          <label className="auth-field">
+            <span>Email</span>
+            <input
+              type="email"
+              placeholder="name@example.com"
+              value={email}
+              aria-invalid={email.length > 0 && !isEmailValid}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+            {email.length > 0 && !isEmailValid ? <small>Невірний формат пошти</small> : null}
+          </label>
+
+          <label className="auth-field">
+            <span>Місце проживання</span>
+            <input
+              type="text"
+              placeholder="Місто, вулиця, будинок"
+              value={deliveryAddress}
+              onChange={(event) => setDeliveryAddress(event.target.value)}
+            />
+          </label>
+
+          <label className="auth-field">
+            <span>Телефон</span>
+            <input
+              type="tel"
+              value={phoneNumber}
+              aria-invalid={phoneNumber.length > 4 && !isPhoneValid}
               onChange={handlePhoneChange}
             />
-            {phone.length > 4 && !isPhoneValid && (
-              <span style={errorText}>Невірний формат: 9 цифр після +380</span>
-            )}
-          </div>
+            {phoneNumber.length > 4 && !isPhoneValid ? (
+              <small>Потрібно 9 цифр після +380</small>
+            ) : null}
+          </label>
 
-          <div style={inputGroup}>
-            <div style={{ position: 'relative' }}>
+          <label className="auth-field">
+            <span>Пароль</span>
+            <div className="auth-password-field">
               <input
-                type={showPass ? "text" : "password"}
-                placeholder="Пароль"
-                style={{ ...inputStyle, border: password.length > 0 && !isPassValid ? '1px solid #ff4d4d' : 'none' }}
+                type={showPassword ? "text" : "password"}
+                placeholder="Мін. 8 символів"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                aria-invalid={password.length > 0 && !isPasswordValid}
+                onChange={(event) => setPassword(event.target.value)}
               />
-              <span style={eyeIconStyle} onClick={() => setShowPass(!showPass)}>
-                {showPass ? "👁️" : "👁️‍🗨️"}
-              </span>
+              <button
+                type="button"
+                className="auth-password-toggle"
+                onClick={() => setShowPassword((current) => !current)}
+              >
+                {showPassword ? "Сховати" : "Показати"}
+              </button>
             </div>
-            {password.length > 0 && !isPassValid && (
-              <span style={errorText}>Мін. 8 симв, велика літера, цифра, спецсимвол</span>
-            )}
-          </div>
+            {password.length > 0 && !isPasswordValid ? (
+              <small>Мінімум 8 символів, літера і спецсимвол</small>
+            ) : null}
+          </label>
 
-          <div style={inputGroup}>
-            <div style={{ position: 'relative' }}>
+          <label className="auth-field">
+            <span>Повторіть пароль</span>
+            <div className="auth-password-field">
               <input
-                type={showConfirmPass ? "text" : "password"}
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="Повторіть пароль"
-                style={{ ...inputStyle, border: confirmPassword.length > 0 && !doPasswordsMatch ? '1px solid #ff4d4d' : 'none' }}
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                aria-invalid={confirmPassword.length > 0 && !doPasswordsMatch}
+                onChange={(event) => setConfirmPassword(event.target.value)}
               />
-              <span style={eyeIconStyle} onClick={() => setShowConfirmPass(!showConfirmPass)}>
-                {showConfirmPass ? "👁️" : "👁️‍🗨️"}
-              </span>
+              <button
+                type="button"
+                className="auth-password-toggle"
+                onClick={() => setShowConfirmPassword((current) => !current)}
+              >
+                {showConfirmPassword ? "Сховати" : "Показати"}
+              </button>
             </div>
-            {confirmPassword.length > 0 && !doPasswordsMatch && (
-              <span style={errorText}>Паролі не співпадають</span>
-            )}
-          </div>
+            {confirmPassword.length > 0 && !doPasswordsMatch ? (
+              <small>Паролі не співпадають</small>
+            ) : null}
+          </label>
 
-          <button
-            disabled={!canSubmit}
-            style={{ ...buttonStyle, opacity: canSubmit ? 1 : 0.5 }}
-          >
-            Продовжити
+          {error ? <p className="auth-error" role="alert">{error}</p> : null}
+
+          <button className="auth-submit" type="submit" disabled={!canSubmit}>
+            {isSubmitting ? "Створюємо..." : "Продовжити"}
           </button>
-        </div>
+        </form>
 
-        <p style={agreementStyle}>
-          Натискаючи кнопку «Продовжити», ви даєте згоду на <span style={linkSpan}>обробку персональних даних</span>
+        <p className="auth-agreement">
+          Натискаючи кнопку, ви даєте згоду на обробку персональних даних.
         </p>
 
-        <div style={footerStyle}>
-          <p style={footerLink}>
-            Уже маєте аккаунт?{' '}
-            <span style={linkSpan} onClick={() => navigate('/login')}>
-              Увійти
-            </span>
-          </p>
-          
-          <p style={footerLink}>
-            <span style={linkSpan} onClick={() => navigate('/recovery')}>
-              Забули пароль?
-            </span>
-          </p>
+        <div className="auth-links">
+          <Link to="/login">Уже маєте аккаунт? Увійти</Link>
+          <Link to="/recovery">Забули пароль?</Link>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
-
-const containerStyle = { 
-  display: 'flex', 
-  justifyContent: 'center', 
-  alignItems: 'center', 
-  minHeight: '100vh', 
-  background: '#ffffff', 
-  fontFamily: 'Inter, sans-serif' 
-};
-
-const cardStyle = { 
-  background: '#fff', 
-  padding: '60px 45px', 
-  borderRadius: '32px', 
-  width: '100%', 
-  maxWidth: '500px', 
-  textAlign: 'center', 
-  boxShadow: '0 4px 30px rgba(0, 0, 0, 0.03)' 
-};
-
-const titleStyle = { 
-  fontSize: '28px', 
-  fontWeight: '700', 
-  marginBottom: '30px', 
-  color: '#333' 
-};
-
-const formStyle = { 
-  display: 'flex',
-   flexDirection: 'column',
-    gap: '15px' 
-};
-
-const inputGroup = { 
-  display: 'flex', 
-  flexDirection: 'column', 
-  textAlign: 'left', 
-  gap: '4px', 
-  position: 'relative' 
-};
-
-const inputStyle = { 
-  background: '#f4f4f7',
-  border: '1px solid transparent', 
-  borderRadius: '16px', 
-  padding: '20px', 
-  fontSize: '16px', 
-  outline: 'none', 
-  width: '100%', 
-  boxSizing: 'border-box', 
-  color: '#1a1a1a',
-  transition: '0.2s border-color'
-};
-
-const errorText = { 
-  color: '#ff4d4d', 
-  fontSize: '10px', 
-  marginLeft: '10px', 
-  fontWeight: '500' 
-};
-
-const eyeIconStyle = { 
-  position: 'absolute', 
-  right: '20px', 
-  top: '50%', 
-  transform: 'translateY(-50%)', 
-  cursor: 'pointer', 
-  opacity: 0.4 
-};
-
-const buttonStyle = { 
-  background: '#7ba3ff', 
-  color: '#fff', 
-  border: 'none', 
-  borderRadius: '15px', 
-  padding: '18px', 
-  fontSize: '16px', 
-  fontWeight: '600', 
-  cursor: 'pointer', 
-  marginTop: '10px', 
-  boxShadow: '0 8px 20px rgba(123, 163, 255, 0.3)', 
-  transition: '0.3s' 
-};
-
-const stepHintStyle = { 
-  fontSize: '14px', 
-  color: '#666', 
-  marginBottom: '10px' 
-};
-
-const agreementStyle = { 
-  fontSize: '11px', 
-  color: '#aaa', 
-  marginTop: '15px', 
-  lineHeight: '1.5' 
-};
-
-const footerStyle = { 
-  marginTop: '25px', 
-  fontSize: '14px',
-  display: 'flex',         
-  justifyContent: 'space-between',
-  alignItems: 'center' 
-};
-
-const linkStyle = { 
-  color: '#ff9d5c', 
-  fontWeight: '600', 
-  cursor: 'pointer' 
-};
-
-const subtitleStyle = { 
-  color: '#666', 
-  fontSize: '14px', 
-  marginBottom: '25px' 
-};
-
-const linkSpan = { 
-  color: '#7ba3ff', 
-  fontWeight: '600', 
-  cursor: 'pointer' 
-};
-
-const footerLink = { color: '#666' };

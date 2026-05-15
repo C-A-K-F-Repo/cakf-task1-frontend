@@ -1,21 +1,28 @@
 import { createBrowserRouter } from "react-router-dom";
 
+import { ProtectedRoute } from "../auth/ProtectedRoute";
 import { AppLayout } from "../layouts/AppLayout";
 import { HomePage } from "../pages/HomePage";
 import { RegisterPage } from "../pages/RegisterPage";
 import { LoginPage } from "../pages/LoginPage";
 import { RecoveryPage } from "../pages/RecoveryPage";
+import { VerifyEmailPage } from "../pages/VerifyEmailPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 
 
 export const router = createBrowserRouter([
   {
-    path: "/",
-    element: <AppLayout />,
+    element: <ProtectedRoute />,
     children: [
       {
-        index: true,
-        element: <HomePage />
+        path: "/",
+        element: <AppLayout />,
+        children: [
+          {
+            index: true,
+            element: <HomePage />
+          }
+        ]
       }
     ]
   },
@@ -30,6 +37,10 @@ export const router = createBrowserRouter([
   {
     path: "/recovery",
     element: <RecoveryPage />
+  },
+  {
+    path: "/verify-email",
+    element: <VerifyEmailPage />
   },
   {
     path: "*",
