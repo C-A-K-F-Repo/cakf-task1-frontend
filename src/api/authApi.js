@@ -74,6 +74,13 @@ export const authApi = {
     });
   },
 
+  loginWithGoogle(idToken) {
+    return request("/auth/google/callback", {
+      method: "POST",
+      body: JSON.stringify({ id_token: idToken })
+    });
+  },
+
   refresh(refreshToken) {
     const encodedRefreshToken = encodeURIComponent(refreshToken);
 

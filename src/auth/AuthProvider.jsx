@@ -3,11 +3,40 @@ import { createContext, useCallback, useEffect, useMemo, useState } from "react"
 import { authApi } from "../api/authApi";
 import {
   clearStoredRefreshToken,
+  clearStoredUser,
   getStoredRefreshToken,
+  getStoredUser,
+  storeUser,
   storeRefreshToken
 } from "./tokenStorage";
 
 export const AuthContext = createContext(null);
+
+function decodeJwtPayload(token) {
+  try {
+    const [, payload] = token.split(".");
+    const normalizedPayload = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decodedPayload = window.atob(normalizedPayload.padEnd(Math.ceil(normalizedPayload.length / 4) * 4, "="));
+
+    return JSON.parse(decodedPayload);
+  } catch {
+    return null;
+  }
+}
+
+function getUserFromAccessToken(accessToken) {
+  const payload = decodeJwtPayload(accessToken);
+
+  if (!payload) {
+    return null;
+  }
+
+  return {
+    id: payload.sub,
+    email: payload.email ?? "",
+    role: payload.role
+  };
+}
 
 export function AuthProvider({ children }) {
   const [accessToken, setAccessToken] = useState(null);
@@ -18,14 +47,30 @@ export function AuthProvider({ children }) {
     setAccessToken(null);
     setUser(null);
     clearStoredRefreshToken();
+    clearStoredUser();
   }, []);
 
   const applySession = useCallback(async (tokenResponse) => {
     storeRefreshToken(tokenResponse.refresh_token);
     setAccessToken(tokenResponse.access_token);
 
-    const currentUser = await authApi.getMe(tokenResponse.access_token);
+    let currentUser;
+    try {
+      currentUser = await authApi.getMe(tokenResponse.access_token);
+    } catch (error) {
+      currentUser = getUserFromAccessToken(tokenResponse.access_token);
+
+      if (!currentUser?.email) {
+        currentUser = getStoredUser();
+      }
+
+      if (!currentUser) {
+        throw error;
+      }
+    }
+
     setUser(currentUser);
+    storeUser(currentUser);
 
     return currentUser;
   }, []);
@@ -90,6 +135,14 @@ export function AuthProvider({ children }) {
     [applySession]
   );
 
+  const loginWithGoogle = useCallback(
+    async (idToken) => {
+      const tokenResponse = await authApi.loginWithGoogle(idToken);
+      return applySession(tokenResponse);
+    },
+    [applySession]
+  );
+
   const logout = useCallback(() => {
     clearSession();
   }, [clearSession]);
@@ -101,10 +154,11 @@ export function AuthProvider({ children }) {
       isAuthenticated: Boolean(accessToken && user),
       isLoading,
       login,
+      loginWithGoogle,
       logout,
       refreshSession
     }),
-    [accessToken, isLoading, login, logout, refreshSession, user]
+    [accessToken, isLoading, login, loginWithGoogle, logout, refreshSession, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

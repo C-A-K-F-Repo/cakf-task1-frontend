@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
+import { GoogleLoginButton } from "../auth/GoogleLoginButton";
 import { useAuth } from "../auth/useAuth";
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -18,12 +19,13 @@ function getRedirectPath(location) {
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, login } = useAuth();
+  const { isAuthenticated, login, loginWithGoogle } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
 
   const isEmailValid = emailRegex.test(email);
   const canSubmit = isEmailValid && password.length > 0 && !isSubmitting;
@@ -54,6 +56,27 @@ export function LoginPage() {
       setIsSubmitting(false);
     }
   }
+
+  const handleGoogleError = useCallback((googleError) => {
+    setError(googleError.message || "Google login недоступний");
+  }, []);
+
+  const handleGoogleSuccess = useCallback(
+    async (idToken) => {
+      setError("");
+      setIsGoogleSubmitting(true);
+
+      try {
+        await loginWithGoogle(idToken);
+        navigate(redirectPath, { replace: true });
+      } catch (apiError) {
+        setError(apiError.message || "Не вдалося увійти через Google");
+      } finally {
+        setIsGoogleSubmitting(false);
+      }
+    },
+    [loginWithGoogle, navigate, redirectPath]
+  );
 
   return (
     <main className="auth-page">
@@ -102,6 +125,16 @@ export function LoginPage() {
             {isSubmitting ? "Входимо..." : "Увійти"}
           </button>
         </form>
+
+        <div className="auth-divider" role="presentation">
+          <span>або</span>
+        </div>
+
+        <GoogleLoginButton
+          disabled={isGoogleSubmitting}
+          onError={handleGoogleError}
+          onSuccess={handleGoogleSuccess}
+        />
 
         <div className="auth-links">
           <Link to="/register">Немає аккаунту? Реєстрація</Link>

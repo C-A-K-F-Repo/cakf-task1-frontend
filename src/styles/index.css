@@ -330,6 +330,59 @@ a {
   margin-top: 8px;
 }
 
+.auth-divider {
+  align-items: center;
+  color: #aaaaaa;
+  display: flex;
+  font-size: 12px;
+  gap: 12px;
+  margin: 18px 0 0;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  background: #f4f4f7;
+  content: "";
+  flex: 1;
+  height: 1px;
+}
+
+.auth-google-button-wrap {
+  margin-top: 15px;
+  min-height: 44px;
+  position: relative;
+  width: 100%;
+}
+
+.auth-google-button {
+  min-height: 44px;
+}
+
+.auth-google-button iframe {
+  margin: 0 auto;
+}
+
+.auth-google-button__overlay {
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 15px;
+  inset: 0;
+  cursor: not-allowed;
+  position: absolute;
+}
+
+.auth-google-fallback {
+  background: #ffffff;
+  border: 1px solid #d4daea;
+  border-radius: 15px;
+  color: #666666;
+  cursor: not-allowed;
+  font-size: 14px;
+  margin-top: 15px;
+  min-height: 44px;
+  opacity: 0.7;
+  width: 100%;
+}
+
 .auth-links {
   display: flex;
   flex-wrap: wrap;

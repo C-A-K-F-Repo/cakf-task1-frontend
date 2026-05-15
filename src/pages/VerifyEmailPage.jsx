@@ -3,6 +3,8 @@ import { Link, useSearchParams } from "react-router-dom";
 
 import { authApi } from "../api/authApi";
 
+const VERIFY_EMAIL_SESSION_PREFIX = "cakf.verifyEmail.";
+
 export function VerifyEmailPage() {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState("loading");
@@ -17,12 +19,20 @@ export function VerifyEmailPage() {
       return;
     }
 
+    const sessionKey = `${VERIFY_EMAIL_SESSION_PREFIX}${token}`;
+    if (window.sessionStorage.getItem(sessionKey) === "success") {
+      setStatus("success");
+      setMessage("Пошту підтверджено. Тепер можна увійти в аккаунт.");
+      return;
+    }
+
     let isMounted = true;
 
     async function verifyEmail() {
       try {
         await authApi.verifyEmail(token);
         if (isMounted) {
+          window.sessionStorage.setItem(sessionKey, "success");
           setStatus("success");
           setMessage("Пошту підтверджено. Тепер можна увійти в аккаунт.");
         }
