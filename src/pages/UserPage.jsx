@@ -210,7 +210,7 @@ export function UserPage() {
             <div className="rows-container">
               {renderRow("Ім'я", "name")}
               {renderRow("Електронна пошта", "email")}
-              {renderRow("Адреса проживання", "address")}
+              {renderRow("Адреса доставки", "address")}
               {renderRow("Номер телефону", "phone")}
               {renderRow("Пароль", "password")}
             </div>
