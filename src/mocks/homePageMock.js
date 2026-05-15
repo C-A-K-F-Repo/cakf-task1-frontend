@@ -1,5 +1,5 @@
 export const navSections = [
-  { href: "#home", label: "Головна" },
+  { href: "/", label: "Головна" },
   { href: "#about", label: "Про нас" }
 ];
 
