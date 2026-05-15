@@ -3,6 +3,11 @@
   min-height: 100vh;
   background-color: #f9fafb;
   font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+}
+
+.history-container *, .history-container *::before, .history-container *::after {
+  box-sizing: border-box;
 }
 
 .history-main {
@@ -17,6 +22,7 @@
   padding: 30px;
   border: 1px solid #f3f4f6;
   max-width: 900px;
+  width: 100%;
 }
 
 .orders-list {
@@ -61,6 +67,7 @@
 
 .order-content-wrapper {
   flex: 1;
+  min-width: 0;
 }
 
 .order-header {
@@ -70,12 +77,14 @@
   border-bottom: 1px dashed #e5e7eb;
   padding-bottom: 12px;
   margin-bottom: 12px;
+  gap: 12px;
 }
 
 .order-meta {
   display: flex;
   gap: 15px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .order-id {
@@ -96,6 +105,7 @@
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .order-items-text {
@@ -103,6 +113,7 @@
   font-size: 14px;
   margin: 0 0 15px 0;
   line-height: 1.5;
+  word-wrap: break-word;
 }
 
 .order-total-row {
@@ -112,6 +123,7 @@
   background-color: #f9fafb;
   padding: 10px 15px;
   border-radius: 10px;
+  gap: 10px;
 }
 
 .total-label {
@@ -124,6 +136,7 @@
   font-size: 16px;
   font-weight: 700;
   color: #1f2937;
+  white-space: nowrap;
 }
 
 .history-bottom-bar {
@@ -133,6 +146,7 @@
   margin-top: 25px;
   padding-top: 20px;
   border-top: 1px solid #f3f4f6;
+  gap: 16px;
 }
 
 .select-all-label {
@@ -143,6 +157,7 @@
   font-weight: 600;
   color: #4b5563;
   cursor: pointer;
+  user-select: none;
 }
 
 .select-all-label input[type="checkbox"] {
@@ -162,6 +177,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .history-delete-action-btn:hover {
@@ -182,6 +198,7 @@
   justify-content: center;
   align-items: center;
   gap: 20px;
+  flex-wrap: wrap;
 }
 
 .pag-btn {
@@ -208,4 +225,65 @@
   font-size: 13px;
   color: #6b7280;
   font-weight: 500;
+}
+
+@media (max-width: 850px) {
+  .history-container {
+    flex-direction: column;
+  }
+
+  .history-main {
+    padding: 24px;
+  }
+
+  .orders-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 550px) {
+  .history-main {
+    padding: 16px 10px;
+  }
+
+  .orders-card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .order-item {
+    padding: 14px;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .order-checkbox-wrapper {
+    padding-right: 0;
+    padding-top: 0;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .order-meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .history-bottom-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .history-delete-action-btn {
+    width: 100%;
+    text-align: center;
+  }
 }

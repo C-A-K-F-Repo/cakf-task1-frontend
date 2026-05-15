@@ -3,11 +3,17 @@
   min-height: 100vh;
   background-color: #f9fafb;
   font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+}
+
+.admin-container *, .admin-container *::before, .admin-container *::after {
+  box-sizing: border-box;
 }
 
 .admin-main {
   flex: 1;
   padding: 40px;
+  min-width: 0;
 }
 
 .table-card {
@@ -16,6 +22,8 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   padding: 20px;
   border: 1px solid #f3f4f6;
+  width: 100%;
+  overflow-x: auto;
 }
 
 .users-table {
@@ -32,6 +40,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .users-table td {
@@ -62,6 +71,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
 }
 
 .phone-sub {
@@ -80,6 +90,7 @@
   height: 7px;
   border-radius: 50%;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .user-status-dot[data-status="Active"] { background: #10b981; }
@@ -116,6 +127,7 @@
   justify-content: center;
   align-items: center;
   gap: 20px;
+  flex-wrap: wrap;
 }
 
 .pag-btn {
@@ -184,7 +196,6 @@
   resize: vertical;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  box-sizing: border-box;
 }
 
 .admin-message-input:focus {
@@ -202,20 +213,22 @@
 
 .bulk-actions-bar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 30px;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .bulk-group {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .bulk-label {
   font-size: 14px;
   font-weight: 600;
   color: #374151;
+  min-width: 100%;
 }
 
 .bulk-btn {
@@ -238,10 +251,7 @@
 
 .admin-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
   display: flex;
@@ -249,6 +259,7 @@
   align-items: center;
   z-index: 1000;
   animation: fadeIn 0.2s ease;
+  padding: 20px;
 }
 
 .admin-modal-box {
@@ -257,7 +268,7 @@
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   max-width: 420px;
-  width: 90%;
+  width: 100%;
   text-align: center;
   border: 1px solid #f3f4f6;
 }
@@ -281,15 +292,20 @@
   justify-content: center;
 }
 
-.admin-cancel-btn {
-  background: #f3f4f6;
+.admin-cancel-btn, .admin-confirm-btn {
+  flex: 1;
   border: none;
-  color: #4b5563;
   padding: 10px 20px;
   border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
+  text-align: center;
+}
+
+.admin-cancel-btn {
+  background: #f3f4f6;
+  color: #4b5563;
 }
 
 .admin-cancel-btn:hover {
@@ -298,13 +314,7 @@
 
 .admin-confirm-btn {
   background: #ef4444;
-  border: none;
   color: white;
-  padding: 10px 20px;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
 }
 
 .admin-confirm-btn:hover {
@@ -314,4 +324,54 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@media (min-width: 551px) {
+  .bulk-actions-bar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+  
+  .bulk-label {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 850px) {
+  .admin-container {
+    flex-direction: column;
+  }
+
+  .admin-main {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 550px) {
+  .admin-main {
+    padding: 16px 10px;
+  }
+
+  .table-card {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .admin-modal-box {
+    padding: 20px;
+  }
+
+  .admin-modal-buttons {
+    flex-direction: column;
+  }
+
+  .bulk-group {
+    width: 100%;
+  }
+
+  .bulk-btn {
+    width: 100%;
+    text-align: center;
+  }
 }

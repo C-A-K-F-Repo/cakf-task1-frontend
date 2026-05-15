@@ -3,6 +3,11 @@
   min-height: 100vh;
   padding: 40px 20px;
   font-family: sans-serif;
+  box-sizing: border-box;
+}
+
+.container *, .container *::before, .container *::after {
+  box-sizing: border-box;
 }
 
 .page-title {
@@ -15,6 +20,7 @@
 
 .layout-wrapper {
   display: flex;
+  flex-direction: row;
   max-width: 1100px;
   margin: 0 auto;
   gap: 24px;
@@ -30,6 +36,7 @@
   flex-direction: column;
   align-items: center;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .avatar-wrapper {
@@ -60,6 +67,7 @@
   cursor: pointer;
   font-weight: 500;
   width: 100%;
+  transition: all 0.15s ease;
 }
 
 .menu-btn.active {
@@ -113,10 +121,12 @@
 
 .info-row {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   padding-bottom: 16px;
   border-bottom: 1px solid #f3f4f6;
+  gap: 16px;
 }
 
 .text-stack {
@@ -144,8 +154,19 @@
   border-radius: 8px;
   padding: 8px 12px;
   outline: none;
-  width: 320px;
+  width: 100%;
+  max-width: 320px;
   background-color: #f9fafb;
+}
+
+.password-input-container {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+}
+
+.password-input-container .input-style {
+  max-width: 100%;
 }
 
 .edit-link {
@@ -159,6 +180,7 @@
 
 .button-action-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   margin-top: 40px;
 }
@@ -169,6 +191,8 @@
   cursor: pointer;
   font-weight: 600;
   padding: 12px 40px;
+  text-align: center;
+  transition: background-color 0.15s ease;
 }
 
 .btn-blue { background-color: #3b82f6; color: white; }
@@ -184,19 +208,32 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(4px);
+  padding: 20px;
 }
 
-.modal-box {
+.modal-box, .loader-box {
   background-color: white;
   padding: 40px;
   border-radius: 24px;
   text-align: center;
   max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
-.confirm-delete-btn:disabled {
-  background-color: #fca5a5;
-  cursor: not-allowed;
+.loader-box {
+  padding: 40px 60px;
+}
+
+.loader-box h2 {
+  color: #1f2937;
+  font-size: 20px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
 }
 
 .modal-buttons {
@@ -233,59 +270,17 @@
 }
 
 .confirm-delete-btn:disabled {
-  background-color: #fca5a5 !important; 
+  background-color: #fca5a5 !important;
   cursor: not-allowed;
   opacity: 0.7;
 }
 
 .confirm-delete-btn:not(:disabled) {
-  background-color: #ef4444 !important; 
+  background-color: #ef4444 !important;
 }
 
 .confirm-delete-btn:not(:disabled):hover {
   background-color: #dc2626 !important;
-}
-.overlay-loader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6); 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(4px); 
-}
-
-.loader-box {
-  background-color: white;
-  padding: 40px 60px;
-  border-radius: 24px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-.loader-box h2 {
-  color: #1f2937;
-  font-size: 20px;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-}
-
-
-.modal-box {
-  background-color: white;
-  padding: 40px;
-  border-radius: 24px;
-  text-align: center;
-  max-width: 400px;
-  width: 90%;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
 .password-toggle-eye {
@@ -295,7 +290,7 @@
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: #9ca3af; /* М'який сірий колір іконки */
+  color: #9ca3af;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -306,10 +301,102 @@
 }
 
 .password-toggle-eye:hover {
-  color: #4b5563; /* Стає темнішою при наведенні */
-  background-color: #f3f4f6; /* Легкий ефект підсвітки кнопки */
+  color: #4b5563;
+  background-color: #f3f4f6;
 }
 
 .password-toggle-eye:active {
-  transform: translateY(-50%) scale(0.95); /* Легкий клік */
+  transform: translateY(-50%) scale(0.95);
+}
+
+@media (max-width: 850px) {
+  .layout-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sidebar {
+    width: 100%;
+    padding: 24px;
+  }
+
+  .menu-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .menu-btn {
+    flex: 1;
+    min-width: 140px;
+    text-align: center;
+  }
+
+  .contact-section {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #f3f4f6;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    align-items: center;
+  }
+  
+  .contact-label {
+    margin-bottom: 0;
+  }
+
+  .info-card {
+    padding: 30px;
+  }
+}
+
+@media (max-width: 550px) {
+  .container {
+    padding: 20px 10px;
+  }
+
+  .page-title {
+    font-size: 20px;
+    margin-bottom: 25px;
+  }
+
+  .menu-list {
+    flex-direction: column;
+  }
+
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .input-style, .password-input-container {
+    max-width: 100%;
+  }
+
+  .button-action-row {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn {
+    width: 100%;
+  }
+
+  .btn-red {
+    margin-left: 0;
+  }
+
+  .modal-box, .loader-box {
+    padding: 24px;
+  }
+
+  .modal-buttons {
+    flex-direction: column;
+  }
+  
+  .cancel-modal-btn, .confirm-delete-btn {
+    width: 100%;
+  }
 }
