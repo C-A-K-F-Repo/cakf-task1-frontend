@@ -8,7 +8,7 @@ export function AppLayout() {
       <header className="app-topbar">
         <div className="app-topbar__inner">
           <div className="brand-mark" aria-label="CAKF SHOP">
-            <span className="brand-mark__badge">CAKF SHOP</span>
+            <Link to="/" className="brand-mark__badge">CAKF SHOP</Link>
           </div>
 
           <nav className="app-nav" aria-label="Main navigation">
