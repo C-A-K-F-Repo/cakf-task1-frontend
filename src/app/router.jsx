@@ -8,6 +8,7 @@ import { RecoveryPage } from "../pages/RecoveryPage"
 import { UserPage } from "../pages/UserPage";
 import { AdminPanel } from "../pages/AdminPanel";
 import { OrderHistory } from "../pages/OrderHistoryPage";
+import { NotFoundPage } from "../pages/NotFoundPage";
 
 
 export const router = createBrowserRouter([
@@ -18,18 +19,6 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <HomePage />
-      },
-      {
-        path: "register",
-        element: <RegisterPage />
-      },
-      { 
-        path: "login", 
-        element: <LoginPage /> 
-      },    
-      { 
-        path: "recovery", 
-        element: <RecoveryPage /> 
       },
       {
         path:"user",
@@ -45,5 +34,21 @@ export const router = createBrowserRouter([
       }
 
     ]
+  },
+  {
+    path: "/register",
+    element: <RegisterPage />
+  },
+  {
+    path: "/login",
+    element: <LoginPage />
+  },
+  {
+    path: "/recovery",
+    element: <RecoveryPage />
+  },
+  {
+    path: "*",
+    element: <NotFoundPage />
   }
 ]);
