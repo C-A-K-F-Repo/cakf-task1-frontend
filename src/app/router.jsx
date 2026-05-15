@@ -5,6 +5,9 @@ import { HomePage } from "../pages/HomePage";
 import { RegisterPage } from "../pages/RegisterPage";
 import { LoginPage } from "../pages/LoginPage";
 import { RecoveryPage } from "../pages/RecoveryPage"
+import { UserPage } from "../pages/UserPage";
+import { AdminPanel } from "../pages/AdminPanel";
+import { OrderHistory } from "../pages/OrderHistoryPage";
 
 
 export const router = createBrowserRouter([
@@ -27,7 +30,20 @@ export const router = createBrowserRouter([
       { 
         path: "recovery", 
         element: <RecoveryPage /> 
+      },
+      {
+        path:"user",
+        element:<UserPage />
+      },
+      {
+        path:"admin",
+        element:<AdminPanel />
+      },
+      {
+        path:"history",
+        element:<OrderHistory />
       }
+
     ]
   }
 ]);
